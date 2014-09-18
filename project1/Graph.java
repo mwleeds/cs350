@@ -3,6 +3,7 @@
 // Author: Matthew Leeds
 // Purpose: Class used to draw a graph that can be used
 // to draw a variety of functions.
+// For: CS 350, Project #1, Matthew Leeds
 
 import java.awt.*;
 import javax.swing.JPanel;

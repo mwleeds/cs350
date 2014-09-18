@@ -2,6 +2,7 @@
 // Author: Matthew Leeds
 // Last Edit: 9.17.2014
 // Purpose: Draw various equations  in a window.
+// For: CS 350, Project #1, Matthew Leeds
 
 import java.io.*;
 import java.util.*;
