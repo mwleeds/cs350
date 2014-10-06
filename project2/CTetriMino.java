@@ -1,3 +1,8 @@
+// File: CTetriMino.java
+// Author: Matthew Leeds
+// Last Edit: 10.06.2014
+// Purpose: This class defines the 7 types of shapes.
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.*;
@@ -15,7 +20,11 @@ public class CTetriMino {
 	
 	public int getX() {	return _x;	}
 	
+	public void setX(int x) { _x = x; }
+	
 	public int getY() {	return _y;	}
+	
+	public void setY(int y) { _y = y; }
 	
 	public int getWidth() { return _width; }
 	
@@ -33,6 +42,8 @@ public class CTetriMino {
 		_type = type;
 		switch (type) {
 		case 0: {
+			// OO
+			// OO
 			_width = 2;
 			_height = 2;
 			_shapeConfiguration = new Boolean[][]{{true,true},{true,true}};
@@ -40,6 +51,7 @@ public class CTetriMino {
 			break;
 		}
 		case 1: {
+			// OOOO
 			_width = 4;
 			_height = 1;
 			_shapeConfiguration = new Boolean[][]{{true,true,true,true}};
@@ -47,6 +59,8 @@ public class CTetriMino {
 			break;
 		}
 		case 2: {
+			//  O
+			// OOO
 			_width = 3;
 			_height = 2;
 			_shapeConfiguration = new Boolean[][]{{false,true,false},{true,true,true}};
@@ -54,6 +68,8 @@ public class CTetriMino {
 			break;
 		}
 		case 3: {
+			//   O
+			// OOO
 			_width = 3;
 			_height = 2;
 			_shapeConfiguration = new Boolean[][]{{false,false,true},{true,true,true}};
@@ -61,6 +77,8 @@ public class CTetriMino {
 			break;
 		}
 		case 4: {
+			// O  
+			// OOO
 			_width = 3;
 			_height = 2;
 			_shapeConfiguration = new Boolean[][]{{true,false,false},{true,true,true}};
@@ -68,6 +86,8 @@ public class CTetriMino {
 			break;
 		}
 		case 5: {
+			//  OO
+			// OO
 			_width = 3;
 			_height = 2;
 			_shapeConfiguration = new Boolean[][]{{false,true,true},{true,true,false}};
@@ -75,6 +95,8 @@ public class CTetriMino {
 			break;
 		}
 		case 6: {
+			// OO
+			//  OO
 			_width = 3;
 			_height = 2;
 			_shapeConfiguration = new Boolean[][]{{true,true,false},{false,true,true}};
@@ -84,6 +106,7 @@ public class CTetriMino {
 		}
 	}
 	
+    // copy constructor
 	public CTetriMino(CTetriMino src) {
 		_type = src.getType();
 		_x = src.getX();
@@ -105,4 +128,19 @@ public class CTetriMino {
 		}
 	}
 
+    public boolean containsPoint(int x, int y) {
+        boolean pointInShape = false; // true if (x,y) is in the shape
+		for (int i = 0; i < _height; i++) {
+			for (int j = 0; j < _width; j++) {
+				if (_shapeConfiguration[i][j] && !pointInShape) {
+                    double r = 25/2.0;
+                    double xc = (_x + (j * 25)) + r;
+                    double yc = (_y + (i * 25)) + r;
+                    // use the distance formula to determine if (x,y) is within the current circle
+                    pointInShape = ((x - xc)*(x - xc)/(r * r) + (y - yc)*(y - yc)/(r * r) <= 1.0);
+                }
+            }
+        }
+        return pointInShape;
+    }
 }

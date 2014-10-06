@@ -1,3 +1,8 @@
+// File: NewTetris.java
+// Author: Matthew Leeds
+// Last Edit: 10.06.2014
+// Purpose: make a window and add an instance of TetrisPanel to it.
+
 import java.awt.*;
 import javax.swing.*;
 
