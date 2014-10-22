@@ -1,4 +1,5 @@
 // File: CSample.java
+// For: CS 350, Project #3
 // Author: Matthew Leeds
 // Last Edit: 10.21.2014
 // Purpose: define a single survey record
@@ -25,8 +26,22 @@ public class CSample {
 	public void setAvgTime(int inAvgTime) { avgTime = inAvgTime; }
 	public int getAvgTime() { return avgTime; }
 	
-	public CSample() {	}
-
+	public CSample() {	
+		recordNumber = new Integer(0);
+		zipCode = new String("");
+		socialMedia = new boolean[]{false, false, false, false, false};
+		ageGroup = new Integer(0);
+		avgTime = new Integer(0);
+	}
+	
+	public CSample(CSample src) {
+		setRecordNumber(src.getRecordNumber());
+		setZipCode(src.getZipCode());
+		setSocialMedia(src.getSocialMedia());
+		setAgeGroup(src.getAgeGroup());
+		setAvgTime(src.getAvgTime());
+	}
+	
 	public String stringify() {
 		String outString = "";
 		outString += String.format("%08d", recordNumber);
@@ -59,7 +74,7 @@ public class CSample {
 		outString += "               ";
 		switch(ageGroup) {
 		case 0:
-			outString += " -19";
+			outString += "  -19";
 			break;
 		case 1:
 			outString += "20-35";
@@ -68,7 +83,7 @@ public class CSample {
 			outString += "36-49";
 			break;
 		case 3:
-			outString += "50- ";
+			outString += "50-  ";
 			break;
 		}
 		outString += "                  ";

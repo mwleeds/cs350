@@ -1,4 +1,5 @@
 // File: SocialMediaSurvey.java
+// For: CS 350, Project #3
 // Author: Matthew Leeds
 // Last Edit: 10.21.2014
 // Purpose: Define the main window of an app for collecting, viewing, 
@@ -7,11 +8,9 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.awt.event.*;
-
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-
 import java.awt.*;
 
 public class SocialMediaSurvey extends JFrame 
@@ -39,7 +38,7 @@ public class SocialMediaSurvey extends JFrame
     public int getMaxRecNum() { return maxRecordNum; }
     
     public List<CSample> getRecords() { return records; }
-
+    public void setRecords(List<CSample> inRecords) { records = inRecords; } 
     private int selectedIndex;
     
     public SocialMediaSurvey() {
@@ -81,13 +80,13 @@ public class SocialMediaSurvey extends JFrame
 		content.add(label5);
 		
 		records = new ArrayList<CSample>();
-		CSample testRecord = new CSample();
+		/*CSample testRecord = new CSample();
 		testRecord.setRecordNumber(1);
 		testRecord.setZipCode("35223");
 		testRecord.setSocialMedia(new boolean[]{true, false, true, true, false});
 		testRecord.setAgeGroup(1);
 		testRecord.setAvgTime(1);
-		records.add(testRecord);
+		records.add(testRecord);*/
 		textBox = new JList<String>();
 		updateTextArea(); // updates recordStrings
 		textBox.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -136,6 +135,7 @@ public class SocialMediaSurvey extends JFrame
 		    if (!dialogWnd.isCancelled()) {
 		    	records.add(dialogWnd.getData());
 		    	updateTextArea();
+		    	maxRecordNum++;
 		    }
 		} else if (e.getSource() == button2) {
 			// modify existing record
@@ -155,7 +155,8 @@ public class SocialMediaSurvey extends JFrame
 							temp.add(backup.get(i));
 						}
 					}
-					records = temp;
+					setRecords(temp);
+					updateTextArea();
 				}
 			}
 		} else if (e.getSource() == button3) {

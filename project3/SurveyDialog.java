@@ -1,15 +1,13 @@
 // File: SurveyDialog.java
+// For: CS 350, Project #3
 // Author: Matthew Leeds
 // Last Edit: 10.21.2014
 // Purpose: Define a dialog box to be used for adding or modifying records.
 
-import java.awt.CheckboxGroup;
 import java.awt.Color;
 import java.awt.Container;
-import java.awt.FlowLayout;
 import java.awt.event.*;
 import javax.swing.*; 
-import javax.swing.border.Border;
 
 public class SurveyDialog extends JDialog implements ActionListener {
     
@@ -20,8 +18,10 @@ public class SurveyDialog extends JDialog implements ActionListener {
     private JLabel question5;
 
     private JLabel recordNum;
-
+    public JLabel getRecordNum() { return recordNum; }
+    
     private JTextField zipField;
+    public JTextField getZipField() { return zipField; }
     
     private JCheckBox group1_1;
     private JCheckBox group1_2;
@@ -29,6 +29,7 @@ public class SurveyDialog extends JDialog implements ActionListener {
     private JCheckBox group1_4;
     private JCheckBox group1_5;
     private JCheckBox[] group1arr;
+    public JCheckBox[] getGroup1arr() { return group1arr; }
     
     private ButtonGroup group2;
     private JRadioButton group2_1;
@@ -36,6 +37,7 @@ public class SurveyDialog extends JDialog implements ActionListener {
     private JRadioButton group2_3;
     private JRadioButton group2_4;
     private JRadioButton[] group2arr;
+    public JRadioButton[] getGroup2arr() { return group2arr; }
     
     private ButtonGroup group3;
     private JRadioButton group3_1;
@@ -43,6 +45,7 @@ public class SurveyDialog extends JDialog implements ActionListener {
     private JRadioButton group3_3;
     private JRadioButton group3_4;
     private JRadioButton[] group3arr;
+    public JRadioButton[] getGroup3arr() { return group3arr; }
     
     private JButton submitButton;
     private JButton cancelButton;
@@ -52,6 +55,7 @@ public class SurveyDialog extends JDialog implements ActionListener {
 
     private CSample dataset;
     public CSample getData() { return dataset; }
+    public void setData(CSample inDataset) { dataset = inDataset; }
     
     public SurveyDialog(JFrame owner, String title, int initVal, int maxRecNum,
     		            CSample surveyData, boolean isNewRecord) {
@@ -60,13 +64,15 @@ public class SurveyDialog extends JDialog implements ActionListener {
 	    Container content = getContentPane();
 	    content.setLayout(null);
 	    
+	    dataset = new CSample(surveyData);
+	    
 	    question1 = new JLabel("Record No.");
 	    question1.setSize(120, 20);
 	    question1.setLocation(50, 30);
 	    question1.setForeground(Color.blue);
 	    content.add(question1);
 
-	    recordNum = new JLabel("");
+	    recordNum = new JLabel("00000000");
 	    recordNum.setSize(150, 20);
 	    recordNum.setLocation(150, 30);
 	    recordNum.setForeground(Color.red);
@@ -219,21 +225,26 @@ public class SurveyDialog extends JDialog implements ActionListener {
     public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == submitButton) {
 			// collect data from all the fields and put it in dataset
-			dataset.setRecordNumber(Integer.parseInt(recordNum.getText()));
-			dataset.setZipCode(zipField.getText());
-			dataset.setSocialMedia(new boolean[]{group1_1.isSelected(), group1_2.isSelected(),
-					                             group1_3.isSelected(), group1_4.isSelected(),
-					                             group1_5.isSelected()});
+			CSample _dataset = new CSample(getData());
+			_dataset.setRecordNumber(Integer.parseInt(getRecordNum().getText()));
+			_dataset.setZipCode(getZipField().getText());
+			JCheckBox[] group1arr = getGroup1arr();
+			_dataset.setSocialMedia(new boolean[]{group1arr[0].isSelected(), group1arr[1].isSelected(),
+					                             group1arr[2].isSelected(), group1arr[3].isSelected(),
+					                             group1arr[4].isSelected()});
+			JRadioButton[] group2arr = getGroup2arr();
 			for (int i=0; i < group2arr.length; i++) {
 				if (group2arr[i].isSelected()) {
-					dataset.setAgeGroup(i);
+					_dataset.setAgeGroup(i);
 				}
 			}
+			JRadioButton[] group3arr = getGroup3arr();
 			for (int i=0; i < group3arr.length; i++) {
 				if (group3arr[i].isSelected()) {
-					dataset.setAvgTime(i);
+					_dataset.setAvgTime(i);
 				}
 			}
+			setData(_dataset);
 		    cancelled = false;
 		    setVisible(false);
 		}
