@@ -37,7 +37,7 @@ public class ThreadSync
 
         // Let them run for 500ms
         try {
-			Thread.sleep(50);
+			Thread.sleep(500);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
