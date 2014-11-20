@@ -5,8 +5,12 @@
 
 import java.awt.*;
 import java.awt.event.*;
+
 import javax.swing.*;
+
 import java.util.*;
+import java.lang.Math;
+
 
 public class TetrisPanel extends JPanel implements MouseListener, MouseMotionListener {
 
@@ -15,7 +19,7 @@ public class TetrisPanel extends JPanel implements MouseListener, MouseMotionLis
     private ArrayList<CTetriMino> duplicates;
     // double buffering
     private Image backBuffer;
-    private Graphics gBackBuffer;
+    private Graphics2D gBackBuffer;
     // has init() been called?
     private boolean isInitialized;
     // used when a shape is selected (dragged)
@@ -23,7 +27,7 @@ public class TetrisPanel extends JPanel implements MouseListener, MouseMotionLis
     // offsets from top left corner at start of drag
     private int dragOffsetX;
     private int dragOffsetY;
-    
+        
 	public TetrisPanel() {
 		isInitialized = false;
 		//setBackground(Color.white);
@@ -36,7 +40,7 @@ public class TetrisPanel extends JPanel implements MouseListener, MouseMotionLis
         duplicates = new ArrayList<CTetriMino>();
         ShapeToBeMoved = null;
         backBuffer = createImage(800, 600);
-        gBackBuffer = backBuffer.getGraphics();
+        gBackBuffer = (Graphics2D) backBuffer.getGraphics();
         // fill the originals array with the 7 shapes
         originals.add(new CTetriMino(25, 25, 0));
         originals.add(new CTetriMino(100, 50, 1));
@@ -48,6 +52,9 @@ public class TetrisPanel extends JPanel implements MouseListener, MouseMotionLis
 	}
 	
 	public void paintComponent(Graphics g) {
+		//g.translate(50,50);
+		Graphics2D g2d = (Graphics2D)g;
+		//g2d.rotate(Math.PI / 2, 800, 300);
 		if (!isInitialized) {
 			init();
 			isInitialized = true;
@@ -73,7 +80,7 @@ public class TetrisPanel extends JPanel implements MouseListener, MouseMotionLis
 			duplicates.get(i).draw(gBackBuffer);
 		}
 		// copy back buffer into view
-		g.drawImage(backBuffer, 0, 0, null);
+		g2d.drawImage(backBuffer, 0, 0, null);
 	}
 
 	public void mouseDragged(MouseEvent e) {
@@ -86,10 +93,37 @@ public class TetrisPanel extends JPanel implements MouseListener, MouseMotionLis
 	}
 
 	public void mouseClicked(MouseEvent e) {
-		/*if (e.isMetaDown()) { // right click
-			// TODO: implement rotate
-		}*/
-		
+		if (e.isMetaDown()) { // right click
+			// check the duplicates from front to back
+			for (int i = duplicates.size() - 1; i >= 0; i--) {
+				CTetriMino currentShape = duplicates.get(i);
+				if (currentShape.containsPoint(e.getX(), e.getY())) {
+					// move to front
+					duplicates.remove(i);
+					duplicates.add(currentShape);
+					int[] circleCenter = currentShape.findCenter(e.getX(), e.getY());
+					int aboutX = circleCenter[0];
+					int aboutY = circleCenter[1];
+					int[] shapeCenter = currentShape.getShapeCenter();
+					int oldX = shapeCenter[0];
+					int oldY = shapeCenter[1];
+					System.out.println("about: " + new Integer(aboutX).toString() + " " + new Integer(aboutY).toString());
+					System.out.println("old center: " + new Integer(oldX).toString() + " " + new Integer(oldY).toString());					
+					System.out.println("old start: " + new Integer(currentShape.getX()).toString() + " " + new Integer(currentShape.getY()).toString());					
+					int newX = (int)(aboutX + (oldX - aboutX) * Math.cos(-Math.PI / 2) - (oldY - aboutY) * Math.sin(-Math.PI / 2));
+					int newY = (int)(aboutY + (oldX - aboutX) * Math.sin(-Math.PI / 2) + (oldY - aboutY) * Math.cos(-Math.PI / 2));
+					newX = newX - (oldX - currentShape.getX());
+					newY = newY - (oldY - currentShape.getY());
+					System.out.println("new: " + new Integer(newX).toString() + " " + new Integer(newY).toString());					
+					currentShape.setX(newX);
+					currentShape.setY(newY);
+					
+					currentShape.setRotateDegrees(currentShape.getRotateDegrees() - 90);
+					repaint();
+					return;
+				}
+			}
+		}
 	}
 
 	public void mousePressed(MouseEvent e) {
@@ -125,6 +159,11 @@ public class TetrisPanel extends JPanel implements MouseListener, MouseMotionLis
 	}
 
 	public void mouseReleased(MouseEvent e) {
+		// delete shapes that are dragged into the bottom area
+		if (e.getY() > 500) {
+			duplicates.remove(ShapeToBeMoved);
+			repaint();
+		}
 		ShapeToBeMoved = null;
 	}
 

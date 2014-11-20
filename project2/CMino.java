@@ -4,7 +4,7 @@
 // Purpose: This class defines a circle that is used for the tetris shapes.
 
 import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 public class CMino {
 
@@ -25,11 +25,11 @@ public class CMino {
 		_color = color;
 	}
 	
-	public void draw(Graphics g) {
-		g.setColor(Color.black);
-		g.drawOval(_x, _y, _diameter, _diameter);
-		g.setColor(_color);
-		g.fillOval(_x, _y, _diameter, _diameter);
+	public void draw(Graphics2D g2d) {
+		g2d.setColor(Color.black);
+		g2d.drawOval(_x, _y, _diameter, _diameter);
+		g2d.setColor(_color);
+		g2d.fillOval(_x, _y, _diameter, _diameter);
 	}
 	
 }
