@@ -143,6 +143,8 @@ public class TetrisPanel extends JPanel implements MouseListener, MouseMotionLis
     		try {
     			duplicates = (ArrayList<CTetriMino>) input.readObject();
     			repaint();
+    			repaint();
+    			//validate();
     		} catch (ClassNotFoundException classnotfoundException) {
     			System.out.println("Unknown object type received!");
     		}}
@@ -150,11 +152,13 @@ public class TetrisPanel extends JPanel implements MouseListener, MouseMotionLis
     
     // send data to peer
     private void sendData(ArrayList<CTetriMino> shapes) {
-    	try {
-    		output.writeObject(shapes);
-    		output.flush();
-    	} catch (IOException ioException) {
-    		System.out.println("Error writing object!");
+    	if (shapes.size() > 0) {
+	    	try {
+	    		output.writeObject(shapes);
+	    		output.flush();
+	    	} catch (IOException ioException) {
+	    		System.out.println("Error writing object!");
+	    	}
     	}
     }
     
@@ -224,6 +228,7 @@ public class TetrisPanel extends JPanel implements MouseListener, MouseMotionLis
 					return;
 				}
 			}
+			sendData(duplicates);
 		}
 	}
 
@@ -241,6 +246,7 @@ public class TetrisPanel extends JPanel implements MouseListener, MouseMotionLis
 				dragOffsetX = e.getX() - ShapeToBeMoved.getX();
 				dragOffsetY = e.getY() - ShapeToBeMoved.getY();
 				repaint();
+				sendData(duplicates);
 				return;
 			}
 		}
@@ -254,18 +260,18 @@ public class TetrisPanel extends JPanel implements MouseListener, MouseMotionLis
 				dragOffsetX = e.getX() - ShapeToBeMoved.getX();
 				dragOffsetY = e.getY() - ShapeToBeMoved.getY();
 				repaint();
+				sendData(duplicates);
 				return;
 			}
 		}
-		sendData(duplicates);
 	}
 
 	public void mouseReleased(MouseEvent e) {
 		// delete shapes that are dragged into the bottom area
 		if (e.getY() > 500) {
 			duplicates.remove(ShapeToBeMoved);
-			sendData(duplicates);
 			repaint();
+			sendData(duplicates);
 		}
 		ShapeToBeMoved = null;
 	}
