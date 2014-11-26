@@ -1,15 +1,20 @@
 // File: TetrisPanel.java
 // Author: Matthew Leeds
-// Last Edit: 10.06.2014
+// Last Edit: 11.25.2014
 // Purpose: This class defines the panel and draws the shapes on it.
 
 import java.awt.*;
 import java.awt.event.*;
-
 import javax.swing.*;
-
 import java.util.*;
 import java.lang.Math;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.InetAddress;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 
 public class TetrisPanel extends JPanel implements MouseListener, MouseMotionListener {
@@ -27,14 +32,28 @@ public class TetrisPanel extends JPanel implements MouseListener, MouseMotionLis
     // offsets from top left corner at start of drag
     private int dragOffsetX;
     private int dragOffsetY;
-        
-	public TetrisPanel() {
+    // networking: server or client?
+    private boolean isServer;        
+    // networking: server hostname or IP
+    private String serverHostname;
+    // networking: data streams
+    private ObjectOutputStream output;
+    private ObjectInputStream input;
+    // networking: sockets
+    private Socket connection;
+    private ServerSocket server;
+    
+    private JFrame parentFrame;
+    
+	public TetrisPanel(JFrame parent, String hostname) {
+        parentFrame = parent;
+		serverHostname = hostname;
 		isInitialized = false;
 		//setBackground(Color.white);
         this.addMouseListener(this);
         this.addMouseMotionListener(this);
 	}
-	
+
 	void init() {
 		originals = new ArrayList<CTetriMino>();
         duplicates = new ArrayList<CTetriMino>();
@@ -50,7 +69,106 @@ public class TetrisPanel extends JPanel implements MouseListener, MouseMotionLis
         originals.add(new CTetriMino(525, 25, 5));
         originals.add(new CTetriMino(625, 25, 6));
 	}
-	
+    
+    // set up and run server or client
+    public void runNetworkService() {
+    	Object[] options = {"Server", "Client"};
+        int choice = JOptionPane.showOptionDialog(this, "Would you like to run in server or client mode?", "Choose Mode",
+                                                  JOptionPane.YES_NO_OPTION,
+                                                  JOptionPane.QUESTION_MESSAGE,
+                                                  null,
+                                                  options,
+                                                  options[1]);
+        System.out.println((choice==0)?"Server":"Client");
+        isServer = (choice==0); // If choice is 0 (Server), then isServer is true; else false
+        if (isServer) { // server
+        	parentFrame.setTitle("NewTetris - Server"); 
+	        try {
+	            server = new ServerSocket(12345, 100);
+	            // continuously accept connections
+	            while (true) {
+	                try {
+	                    waitForConnection();
+	                    getStreams();
+	                    processConnection();
+	                } catch (EOFException eofException) {	
+	                    System.out.println("Connection terminated!");
+	                } finally {
+	                    closeConnection();
+	                }
+	            }
+	        } catch (IOException ioException) {
+	            ioException.printStackTrace();
+	        }
+        } else { // client
+        	parentFrame.setTitle("NewTetris - Client");
+        	try {
+	        	try {
+	                connectToServer();
+	                getStreams();
+	                processConnection();
+	            } catch (EOFException eofException) {	
+	                System.out.println("Connection terminated!");
+	            } finally {
+	                closeConnection();
+	            }
+        	} catch (IOException ioException) {
+        		ioException.printStackTrace();
+        	}
+        }
+    }
+   
+    // wait for connection to arrive  
+    private void waitForConnection() throws IOException {
+        connection = server.accept();
+        //System.out.println("Connected to Client!");
+    }
+    
+    // connect to server 
+    private void connectToServer() throws IOException {
+        connection = new Socket(InetAddress.getByName(serverHostname), 12345); 
+        //System.out.println("Connected to Server!");
+    }
+            
+    // get streams to send and recieve data
+    private void getStreams() throws IOException {
+        output = new ObjectOutputStream(connection.getOutputStream());
+        output.flush();
+        input = new ObjectInputStream(connection.getInputStream());
+    }
+   
+    // process data from connection
+    private void processConnection() throws IOException {
+    	while (true) {
+    		try {
+    			duplicates = (ArrayList<CTetriMino>) input.readObject();
+    			repaint();
+    		} catch (ClassNotFoundException classnotfoundException) {
+    			System.out.println("Unknown object type received!");
+    		}}
+    }
+    
+    // send data to peer
+    private void sendData(ArrayList<CTetriMino> shapes) {
+    	try {
+    		output.writeObject(shapes);
+    		output.flush();
+    	} catch (IOException ioException) {
+    		System.out.println("Error writing object!");
+    	}
+    }
+    
+    // close streams and socket
+    private void closeConnection() {
+        try {
+            output.close();
+            input.close();
+            connection.close();
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
+    }
+
 	public void paintComponent(Graphics g) {
 		//g.translate(50,50);
 		Graphics2D g2d = (Graphics2D)g;
@@ -101,29 +219,7 @@ public class TetrisPanel extends JPanel implements MouseListener, MouseMotionLis
 					// move to front
 					duplicates.remove(i);
 					duplicates.add(currentShape);
-					
-					
 					currentShape.rotate(e.getX(),e.getY());
-					
-					
-//					int[] circleCenter = currentShape.findCenter(e.getX(), e.getY());
-//					int aboutX = circleCenter[0];
-//					int aboutY = circleCenter[1];
-//					int[] shapeCenter = currentShape.getShapeCenter();
-//					int oldX = shapeCenter[0];
-//					int oldY = shapeCenter[1];
-//					System.out.println("about: " + new Integer(aboutX).toString() + " " + new Integer(aboutY).toString());
-//					System.out.println("old center: " + new Integer(oldX).toString() + " " + new Integer(oldY).toString());					
-//					System.out.println("old start: " + new Integer(currentShape.getX()).toString() + " " + new Integer(currentShape.getY()).toString());					
-//					int newX = (int)(aboutX + (oldX - aboutX) * Math.cos(-Math.PI / 2) - (oldY - aboutY) * Math.sin(-Math.PI / 2));
-//					int newY = (int)(aboutY + (oldX - aboutX) * Math.sin(-Math.PI / 2) + (oldY - aboutY) * Math.cos(-Math.PI / 2));
-//					newX = newX - (oldX - currentShape.getX());
-//					newY = newY - (oldY - currentShape.getY());
-//					System.out.println("new: " + new Integer(newX).toString() + " " + new Integer(newY).toString());					
-//					currentShape.setX(newX);
-//					currentShape.setY(newY);
-//					
-//					currentShape.setRotateDegrees(currentShape.getRotateDegrees() - 90);
 					repaint();
 					return;
 				}
@@ -161,12 +257,14 @@ public class TetrisPanel extends JPanel implements MouseListener, MouseMotionLis
 				return;
 			}
 		}
+		sendData(duplicates);
 	}
 
 	public void mouseReleased(MouseEvent e) {
 		// delete shapes that are dragged into the bottom area
 		if (e.getY() > 500) {
 			duplicates.remove(ShapeToBeMoved);
+			sendData(duplicates);
 			repaint();
 		}
 		ShapeToBeMoved = null;

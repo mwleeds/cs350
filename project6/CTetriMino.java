@@ -8,9 +8,10 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.util.*;
+import java.io.Serializable;
 import java.lang.Math;
 
-public class CTetriMino {
+public class CTetriMino implements Serializable{
 	
 	private int _type; // shape type, 0-6
 	private int _x;
@@ -130,19 +131,19 @@ public class CTetriMino {
                     double r = 25/2.0;
                     double xc = (_x + (j * 25)) + r;
                     double yc = (_y + (i * 25)) + r;
-                    System.out.println("old center: " + new Double(xc).toString() + " " + new Double(yc).toString());
+                    //System.out.println("old center: " + new Double(xc).toString() + " " + new Double(yc).toString());
                     // use the distance formula to determine if (x,y) is within the current circle
                     pointInShape = (Math.pow(x - xc, 2) / Math.pow(r, 2) + Math.pow(y - yc, 2) / Math.pow(r, 2) <= 1.0);
                     if (pointInShape) {
-                    	System.out.printf("Determined in shape with %d %d\n", i, j);
+                    	//System.out.printf("Determined in shape with %d %d\n", i, j);
                     }
                 }
             }
         }
 		if (pointInShape) {
-			System.out.println("Point was in shape.");
+			//System.out.println("Point was in shape.");
 		} else {
-			System.out.println("Point NOT in shape");
+			//System.out.println("Point NOT in shape");
 		}
         return pointInShape;
     }
@@ -156,11 +157,11 @@ public class CTetriMino {
                     double r = 25/2.0;
                     double xc = (_x + (j * 25)) + r;
                     double yc = (_y + (i * 25)) + r;
-                    System.out.println("old center: " + new Double(xc).toString() + " " + new Double(yc).toString());
+                    //System.out.println("old center: " + new Double(xc).toString() + " " + new Double(yc).toString());
                     // use the distance formula to determine if (x,y) is within the current circle
                     pointInShape = (Math.pow(x - xc, 2) / Math.pow(r, 2) + Math.pow(y - yc, 2) / Math.pow(r, 2) <= 1.0);
                     if (pointInShape) {
-                    	System.out.printf("Determined in shape with %d %d\n", i, j);
+                    	//System.out.printf("Determined in shape with %d %d\n", i, j);
                     	return new int[]{i,j};
                     }
                 }
@@ -189,7 +190,7 @@ public class CTetriMino {
     	_shapeConfiguration = tempConfig;
     	
     	//Offset x and y
-    	System.out.printf("%d %d\n", offsets[0], offsets[1]);
+    	//System.out.printf("%d %d\n", offsets[0], offsets[1]);
     	int offsetY = offsets[1] - offsets[0];
     	int offsetX = initialX - 1 - offsets[0] - offsets[1];
     	
