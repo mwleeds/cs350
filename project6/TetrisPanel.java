@@ -1,5 +1,5 @@
 // File: TetrisPanel.java
-// Author: Matthew Leeds
+// Author: Matthew Leeds and CJ Guttormsson
 // Last Edit: 11.25.2014
 // Purpose: This class defines the panel and draws the shapes on it.
 
@@ -81,12 +81,13 @@ public class TetrisPanel extends JPanel implements MouseListener, MouseMotionLis
                                                   options[1]);
         System.out.println((choice==0)?"Server":"Client");
         isServer = (choice==0); // If choice is 0 (Server), then isServer is true; else false
+        
         if (isServer) { // server
         	parentFrame.setTitle("NewTetris - Server"); 
 	        try {
 	            server = new ServerSocket(12345, 100);
 	            // continuously accept connections
-	            while (true) {
+	            do {
 	                try {
 	                    waitForConnection();
 	                    getStreams();
@@ -96,32 +97,31 @@ public class TetrisPanel extends JPanel implements MouseListener, MouseMotionLis
 	                } finally {
 	                    closeConnection();
 	                }
-	            }
+	            } while (true);
 	        } catch (IOException ioException) {
 	            ioException.printStackTrace();
 	        }
         } else { // client
         	parentFrame.setTitle("NewTetris - Client");
         	try {
-	        	try {
-	                connectToServer();
-	                getStreams();
-	                processConnection();
-	            } catch (EOFException eofException) {	
-	                System.out.println("Connection terminated!");
-	            } finally {
-	                closeConnection();
-	            }
+	            connectToServer();
+	            getStreams();
+	            processConnection();
+	        } catch (EOFException eofException) {	
+	            System.out.println("Connection terminated!");
         	} catch (IOException ioException) {
         		ioException.printStackTrace();
-        	}
+        	} finally {
+	            closeConnection();
+	        }
         }
     }
    
     // wait for connection to arrive  
     private void waitForConnection() throws IOException {
         connection = server.accept();
-        //System.out.println("Connected to Client!");
+        System.out.println("Connection received from:" + 
+        				   connection.getInetAddress().getHostName());
     }
     
     // connect to server 
@@ -130,36 +130,45 @@ public class TetrisPanel extends JPanel implements MouseListener, MouseMotionLis
         //System.out.println("Connected to Server!");
     }
             
-    // get streams to send and recieve data
+    // get streams to send and receive data
     private void getStreams() throws IOException {
         output = new ObjectOutputStream(connection.getOutputStream());
         output.flush();
         input = new ObjectInputStream(connection.getInputStream());
+        System.out.println("I/O Streams acquired.");
     }
    
     // process data from connection
     private void processConnection() throws IOException {
+    	System.out.println("Connection successful!");
+    	ArrayList<CTetriMino> temporary;
+    	
     	while (true) {
     		try {
-    			duplicates = (ArrayList<CTetriMino>) input.readObject();
+    			
+    			temporary = ( ArrayList<CTetriMino> ) input.readObject();
+    			System.out.println("Received Something.");
+    			duplicates = temporary;
     			repaint();
-    			repaint();
-    			//validate();
+    			
     		} catch (ClassNotFoundException classnotfoundException) {
     			System.out.println("Unknown object type received!");
-    		}}
+    		}
+    	}
     }
     
     // send data to peer
     private void sendData(ArrayList<CTetriMino> shapes) {
-    	if (shapes.size() > 0) {
-	    	try {
-	    		output.writeObject(shapes);
-	    		output.flush();
-	    	} catch (IOException ioException) {
-	    		System.out.println("Error writing object!");
-	    	}
-    	}
+    	
+	    try {
+	    	output.reset();
+	    	output.writeObject(shapes);
+	    	output.flush();
+	    	
+	    } catch (IOException ioException) {
+	    	System.out.println("Error writing object!");
+	    }
+	    System.out.println("Sent something.");
     }
     
     // close streams and socket
@@ -211,6 +220,7 @@ public class TetrisPanel extends JPanel implements MouseListener, MouseMotionLis
 			ShapeToBeMoved.setX(e.getX() - dragOffsetX);
 			ShapeToBeMoved.setY(e.getY() - dragOffsetY);
 			repaint();
+			sendData(duplicates);
 		}
 	}
 
@@ -225,10 +235,11 @@ public class TetrisPanel extends JPanel implements MouseListener, MouseMotionLis
 					duplicates.add(currentShape);
 					currentShape.rotate(e.getX(),e.getY());
 					repaint();
+					sendData(duplicates);
+					repaint();
 					return;
 				}
 			}
-			sendData(duplicates);
 		}
 	}
 
@@ -247,6 +258,7 @@ public class TetrisPanel extends JPanel implements MouseListener, MouseMotionLis
 				dragOffsetY = e.getY() - ShapeToBeMoved.getY();
 				repaint();
 				sendData(duplicates);
+				repaint();
 				return;
 			}
 		}
@@ -261,6 +273,7 @@ public class TetrisPanel extends JPanel implements MouseListener, MouseMotionLis
 				dragOffsetY = e.getY() - ShapeToBeMoved.getY();
 				repaint();
 				sendData(duplicates);
+				repaint();
 				return;
 			}
 		}
@@ -270,10 +283,11 @@ public class TetrisPanel extends JPanel implements MouseListener, MouseMotionLis
 		// delete shapes that are dragged into the bottom area
 		if (e.getY() > 500) {
 			duplicates.remove(ShapeToBeMoved);
-			repaint();
-			sendData(duplicates);
 		}
 		ShapeToBeMoved = null;
+		repaint();
+		sendData(duplicates);
+		repaint();
 	}
 
 	public void mouseEntered(MouseEvent e) {}

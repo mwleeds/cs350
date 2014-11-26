@@ -1,5 +1,5 @@
 // File: CTetriMino.java
-// Author: Matthew Leeds
+// Author: Matthew Leeds and CJ Guttormsson
 // Last Edit: 10.06.2014
 // Purpose: This class defines the 7 types of shapes.
 

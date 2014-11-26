@@ -1,5 +1,5 @@
 // File: NewTetris.java
-// Author: Matthew Leeds
+// Author: Matthew Leeds and CJ Guttormsson
 // Last Edit: 11.25.2014
 // Purpose: make a window and add an instance of TetrisPanel to it.
 

@@ -1,5 +1,5 @@
 // File: CMino.java
-// Author: Matthew Leeds
+// Author: Matthew Leeds and CJ Guttormsson
 // Last Edit: 10.06.2014
 // Purpose: This class defines a circle that is used for the tetris shapes.
 
